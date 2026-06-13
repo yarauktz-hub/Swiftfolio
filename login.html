@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ForgeCV — Sign In</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -483,7 +485,7 @@ function togglePass() {
 }
 
 // ── LOGIN ──
-function handleLogin() {
+async function handleLogin() {
   const email = document.getElementById('email');
   const password = document.getElementById('password');
   const passErr = document.getElementById('password-err');
@@ -496,11 +498,17 @@ function handleLogin() {
 
   const btn = document.getElementById('login-btn');
   btn.classList.add('loading');
-  setTimeout(() => {
-    btn.classList.remove('loading');
-    showToast('Signed in successfully');
-    setTimeout(() => { window.location.href = 'index.html#builder'; }, 900);
-  }, 1600);
+
+  const result = await signIn(email.value.trim(), password.value);
+  btn.classList.remove('loading');
+
+  if (result.error) {
+    showToast(result.error);
+    return;
+  }
+
+  showToast('Signed in successfully');
+  setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
 }
 
 // ── FORGOT ──

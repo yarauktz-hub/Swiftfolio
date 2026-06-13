@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ForgeCV — Sign Up</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -606,24 +608,37 @@ function goStep3() {
   setTimeout(() => document.getElementById('confirm').focus(), 100);
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   const confirm = document.getElementById('confirm');
   validateConfirm(confirm);
   if (!confirm.classList.contains('valid')) { showToast('Passwords do not match'); return; }
+
   const btn = document.getElementById('submit-btn');
   btn.classList.add('loading');
-  setTimeout(() => {
-    btn.classList.remove('loading');
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById('legal-text').style.display = 'none';
-    document.getElementById('success').classList.add('show');
-    for (let i = 1; i <= 3; i++) {
-      const dot = document.getElementById('dot' + i);
-      dot.classList.add('active');
-      dot.style.width = '6px'; dot.style.borderRadius = '50%';
-      dot.style.background = '#34d399';
-    }
-  }, 1800);
+
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const fname = document.getElementById('fname').value.trim();
+  const lname = document.getElementById('lname').value.trim();
+  const fullName = fname + ' ' + lname;
+
+  const result = await signUp(email, password, fullName);
+  btn.classList.remove('loading');
+
+  if (result.error) {
+    showToast(result.error);
+    return;
+  }
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('legal-text').style.display = 'none';
+  document.getElementById('success').classList.add('show');
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.classList.add('active');
+    dot.style.width = '6px'; dot.style.borderRadius = '50%';
+    dot.style.background = '#34d399';
+  }
 }
 
 // ── TOAST ──

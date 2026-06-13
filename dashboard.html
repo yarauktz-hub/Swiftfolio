@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ForgeCV — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -525,7 +527,7 @@ nav {
         <div class="dropdown-item" onclick="showToast('Profile coming soon')">Profile</div>
         <div class="dropdown-item" onclick="showToast('Settings coming soon')">Settings</div>
         <div class="dropdown-divider"></div>
-        <a href="index.html" class="dropdown-item danger">Sign out</a>
+        <a href="#" class="dropdown-item danger" onclick="signOut()">Sign out</a>
       </div>
     </div>
   </div>
@@ -706,6 +708,67 @@ if (saved) {
   html.setAttribute('data-theme', saved);
   document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀' : '☾';
 }
+
+// ── LOAD USER DATA ──
+async function loadDashboard() {
+  const user = await requireAuth();
+  if (!user) return;
+
+  const profile = await getProfile();
+  if (profile) {
+    const name = profile.full_name ? profile.full_name.split(' ')[0] : 'there';
+    document.querySelector('.welcome-text h1').textContent = 'Good day, ' + name + '.';
+    document.getElementById('stat-downloads').textContent = profile.downloads || 0;
+    if (profile.plan === 'pro') {
+      document.getElementById('upgrade-banner').style.display = 'none';
+      document.querySelector('.stat-value[style*="accent"]').textContent = 'Pro';
+    }
+  }
+
+  const result = await getCVs();
+  if (result.data) {
+    document.getElementById('stat-cvs').textContent = result.data.length;
+    renderCVCards(result.data);
+  }
+}
+
+function renderCVCards(cvs) {
+  const grid = document.getElementById('cv-grid');
+  const existingCards = grid.querySelectorAll('.cv-card');
+  existingCards.forEach(c => c.remove());
+
+  cvs.forEach(cv => {
+    const card = document.createElement('div');
+    card.className = 'cv-card';
+    card.id = 'cv-' + cv.id;
+    const date = new Date(cv.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    card.innerHTML = `
+      <div class="cv-card-preview">
+        <div class="pv-name"></div>
+        <div class="pv-role"></div>
+        <div class="pv-div"></div>
+        <div class="pv-line pv-w80"></div>
+        <div class="pv-line pv-w60"></div>
+        <div class="template-badge">${cv.template || 'Classic'}</div>
+      </div>
+      <div class="cv-card-info">
+        <div class="cv-card-name">${cv.title || 'Untitled CV'}</div>
+        <div class="cv-card-meta">
+          <div class="cv-card-date">${date}</div>
+          <div class="cv-card-template">${cv.template || 'Classic'}</div>
+        </div>
+      </div>
+      <div class="cv-card-actions">
+        <button class="action-btn" onclick="editCV('${cv.id}')">Edit</button>
+        <button class="action-btn" onclick="downloadCV('${cv.id}')">Download</button>
+        <button class="action-btn danger" onclick="confirmDelete('${cv.id}')">Delete</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// Load on page start
+loadDashboard();
 
 // ── DROPDOWN ──
 function toggleDropdown() {
