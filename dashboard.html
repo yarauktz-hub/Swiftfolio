@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swiftfolio — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #6c63ff;
+  --accent-dim: rgba(108,99,255,0.1);
+  --accent-border: rgba(108,99,255,0.2);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0c0c12;
+  --bg2: #111119;
+  --surface: #16161f;
+  --surface2: #1c1c28;
+  --border: #252530;
+  --text: #ececf4;
+  --text2: #9090a8;
+  --text3: #5a5a72;
+}
+
+[data-theme="light"] {
+  --bg: #f4f4f8;
+  --bg2: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f0f5;
+  --border: #e0e0ea;
+  --text: #0c0c18;
+  --text2: #5a5a72;
+  --text3: #9090a8;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 5%; height: 58px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 800;
+  color: var(--text); text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.logo span { color: var(--accent); }
+
+.nav-right {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.theme-btn {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  transition: border-color var(--transition);
+}
+
+.theme-btn:hover { border-color: var(--accent); }
+
+.avatar-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--accent); cursor: pointer;
+  position: relative;
+}
+
+.dropdown {
+  display: none;
+  position: absolute; top: 42px; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 180px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 200;
+}
+
+.dropdown.open { display: block; }
+
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  font-size: 0.82rem; color: var(--text2);
+  border-radius: var(--radius-sm);
+  cursor: pointer; text-decoration: none;
+  transition: background var(--transition), color var(--transition);
+}
+
+.dropdown-item:hover { background: var(--surface2); color: var(--text); }
+.dropdown-item.danger:hover { background: rgba(255,107,107,0.08); color: #ff6b6b; }
+.dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ── PAGE LAYOUT ── */
+.page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 40px 5% 80px;
+}
+
+/* ── WELCOME ── */
+.welcome {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  margin-bottom: 36px;
+}
+
+.welcome-text h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 800; letter-spacing: -0.8px;
+  margin-bottom: 4px;
+}
+
+.welcome-text p { font-size: 0.85rem; color: var(--text2); font-weight: 300; }
+
+.btn-primary {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  padding: 10px 22px;
+  font-family: var(--font-display);
+  font-size: 0.88rem; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 7px;
+  transition: opacity var(--transition), transform var(--transition);
+  letter-spacing: 0.2px;
+}
+
+.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color var(--transition);
+}
+
+.stat-card:hover { border-color: var(--accent-border); }
+
+.stat-label {
+  font-size: 0.73rem; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 800;
+  color: var(--text); line-height: 1;
+  margin-bottom: 3px;
+}
+
+.stat-sub { font-size: 0.75rem; color: var(--text3); }
+
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.section-action {
+  font-size: 0.78rem; color: var(--accent);
+  text-decoration: none; cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.section-action:hover { opacity: 0.75; }
+
+/* ── CV GRID ── */
+.cv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+/* New CV card */
+.cv-card-new {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 32px 20px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; cursor: pointer;
+  text-decoration: none;
+  transition: border-color var(--transition), background var(--transition);
+  min-height: 200px;
+}
+
+.cv-card-new:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+.new-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: var(--text3);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.cv-card-new:hover .new-icon { border-color: var(--accent); color: var(--accent); }
+
+.new-label { font-size: 0.82rem; color: var(--text3); font-weight: 500; }
+.cv-card-new:hover .new-label { color: var(--accent); }
+
+/* CV Card */
+.cv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+  cursor: pointer;
+  position: relative;
+}
+
+.cv-card:hover { border-color: var(--accent-border); transform: translateY(-2px); }
+
+.cv-card-preview {
+  height: 130px;
+  background: #fff;
+  display: flex; flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* mini preview lines */
+.pv-name { width: 55%; height: 8px; background: #1a1a2e; border-radius: 2px; }
+.pv-role { width: 35%; height: 5px; background: var(--accent); border-radius: 2px; margin-bottom: 3px; }
+.pv-div { width: 100%; height: 1px; background: #eee; margin: 2px 0; }
+.pv-line { height: 4px; background: #eee; border-radius: 2px; }
+.pv-w80 { width: 80%; }
+.pv-w60 { width: 60%; }
+.pv-w40 { width: 40%; }
+
+/* template badge on preview */
+.template-badge {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.5);
+  color: #fff; font-size: 0.62rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* modern preview */
+.cv-card-preview.modern-prev {
+  flex-direction: row; padding: 0; gap: 0;
+}
+
+.modern-sidebar {
+  width: 35%; background: #1a1a2e;
+  padding: 10px 8px; display: flex; flex-direction: column; gap: 4px;
+}
+
+.modern-main {
+  flex: 1; background: #fff;
+  padding: 10px 8px; display: flex; flex-direction: column; gap: 4px;
+}
+
+.ms-circle { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.ms-line { height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; }
+.ms-line60 { width: 60%; }
+.ms-line40 { width: 40%; }
+
+/* cv info */
+.cv-card-info { padding: 12px 14px; }
+
+.cv-card-name {
+  font-weight: 600; font-size: 0.85rem;
+  color: var(--text); margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.cv-card-meta {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.cv-card-date { font-size: 0.72rem; color: var(--text3); }
+.cv-card-template { font-size: 0.7rem; color: var(--accent); font-weight: 500; }
+
+/* card actions */
+.cv-card-actions {
+  display: flex; gap: 6px;
+  padding: 0 14px 12px;
+}
+
+.action-btn {
+  flex: 1; padding: 7px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem; color: var(--text2);
+  font-family: var(--font-body); cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  text-align: center;
+}
+
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-btn.danger:hover { border-color: #ff6b6b; color: #ff6b6b; background: rgba(255,107,107,0.06); }
+
+/* ── ACTIVITY ── */
+.activity-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.activity-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+
+.activity-item:last-child { border-bottom: none; }
+.activity-item:hover { background: var(--surface2); }
+
+.activity-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-create { background: #34d399; }
+.dot-download { background: var(--accent); }
+.dot-edit { background: #f5c542; }
+
+.activity-text { flex: 1; font-size: 0.82rem; color: var(--text2); }
+.activity-text strong { color: var(--text); font-weight: 500; }
+.activity-time { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
+
+/* ── UPGRADE BANNER ── */
+.upgrade-banner {
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.upgrade-text h3 {
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 700; margin-bottom: 3px;
+}
+
+.upgrade-text p { font-size: 0.8rem; color: var(--text2); font-weight: 300; }
+
+.btn-upgrade {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  padding: 9px 20px;
+  font-family: var(--font-display);
+  font-size: 0.82rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap;
+  transition: opacity var(--transition);
+  text-decoration: none;
+}
+
+.btn-upgrade:hover { opacity: 0.88; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  max-width: 360px; width: 100%;
+  position: relative;
+  animation: fadeUp 0.3s ease both;
+}
+
+.modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none;
+  color: var(--text3); cursor: pointer; font-size: 1rem;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;
+}
+
+.modal-sub { color: var(--text2); font-size: 0.82rem; margin-bottom: 20px; line-height: 1.6; }
+
+.modal-actions { display: flex; gap: 8px; }
+
+.btn-ghost {
+  flex: 1; padding: 10px;
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text2); font-family: var(--font-body);
+  font-size: 0.85rem; cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.btn-ghost:hover { border-color: var(--accent); color: var(--text); }
+
+.btn-danger {
+  flex: 1; padding: 10px;
+  background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+  border-radius: var(--radius-sm);
+  color: #ff6b6b; font-family: var(--font-body);
+  font-size: 0.85rem; cursor: pointer;
+  transition: background var(--transition);
+}
+
+.btn-danger:hover { background: rgba(255,107,107,0.2); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 48px 20px;
+  color: var(--text3); font-size: 0.85rem;
+  display: none;
+}
+
+.empty-state.show { display: block; }
+.empty-icon { font-size: 2rem; margin-bottom: 12px; }
+.empty-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 20px; font-size: 0.82rem; color: var(--text);
+  z-index: 300; transition: transform 0.3s; white-space: nowrap;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+  .cv-grid { grid-template-columns: 1fr 1fr; }
+  .welcome { flex-direction: column; align-items: flex-start; }
+  .upgrade-banner { flex-direction: column; }
+}
+
+@media (max-width: 400px) {
+  .cv-grid { grid-template-columns: 1fr; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">Swift<span>folio</span></a>
+  <div class="nav-right">
+    <button class="theme-btn" id="theme-btn"><span id="theme-icon">☀</span></button>
+    <div class="avatar-btn" id="avatar-btn" onclick="toggleDropdown()">
+      JD
+      <div class="dropdown" id="dropdown">
+        <div class="dropdown-item" onclick="showToast('Profile coming soon')">Profile</div>
+        <div class="dropdown-item" onclick="showToast('Settings coming soon')">Settings</div>
+        <div class="dropdown-divider"></div>
+        <a href="index.html" class="dropdown-item danger">Sign out</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- WELCOME -->
+  <div class="welcome reveal">
+    <div class="welcome-text">
+      <h1>Good day, John.</h1>
+      <p>Manage your CVs and track your downloads.</p>
+    </div>
+    <a href="index.html#builder" class="btn-primary">+ New CV</a>
+  </div>
+
+  <!-- UPGRADE BANNER -->
+  <div class="upgrade-banner reveal" id="upgrade-banner">
+    <div class="upgrade-text">
+      <h3>Unlock all 10 templates</h3>
+      <p>You're on the free plan. Pay ₦750 once to access all premium templates.</p>
+    </div>
+    <a href="pricing.html" class="btn-upgrade">Upgrade — ₦750</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row reveal">
+    <div class="stat-card">
+      <div class="stat-label">CVs created</div>
+      <div class="stat-value" id="stat-cvs">2</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Downloads</div>
+      <div class="stat-value" id="stat-downloads">1</div>
+      <div class="stat-sub">PDFs generated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Plan</div>
+      <div class="stat-value" style="font-size:1.1rem;color:var(--accent)">Free</div>
+      <div class="stat-sub"><a href="pricing.html" style="color:var(--accent);text-decoration:none;font-size:0.75rem;">Upgrade →</a></div>
+    </div>
+  </div>
+
+  <!-- MY CVS -->
+  <div class="section-header reveal">
+    <div class="section-title">My CVs</div>
+  </div>
+
+  <div class="cv-grid reveal" id="cv-grid">
+
+    <!-- New CV -->
+    <a href="index.html#builder" class="cv-card-new">
+      <div class="new-icon">+</div>
+      <div class="new-label">New CV</div>
+    </a>
+
+    <!-- CV 1 -->
+    <div class="cv-card" id="cv-1">
+      <div class="cv-card-preview">
+        <div class="pv-name"></div>
+        <div class="pv-role"></div>
+        <div class="pv-div"></div>
+        <div class="pv-line pv-w80"></div>
+        <div class="pv-line pv-w60"></div>
+        <div class="pv-div"></div>
+        <div class="pv-line pv-w80"></div>
+        <div class="pv-line pv-w40"></div>
+        <div class="template-badge">Classic</div>
+      </div>
+      <div class="cv-card-info">
+        <div class="cv-card-name">Software Engineer CV</div>
+        <div class="cv-card-meta">
+          <div class="cv-card-date">Jun 10, 2025</div>
+          <div class="cv-card-template">Classic</div>
+        </div>
+      </div>
+      <div class="cv-card-actions">
+        <button class="action-btn" onclick="editCV(1)">Edit</button>
+        <button class="action-btn" onclick="downloadCV(1)">Download</button>
+        <button class="action-btn danger" onclick="confirmDelete(1)">Delete</button>
+      </div>
+    </div>
+
+    <!-- CV 2 -->
+    <div class="cv-card" id="cv-2">
+      <div class="cv-card-preview modern-prev">
+        <div class="modern-sidebar">
+          <div class="ms-circle"></div>
+          <div class="ms-line ms-line60"></div>
+          <div class="ms-line ms-line40"></div>
+          <div style="height:6px"></div>
+          <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;width:80%"></div>
+          <div style="height:3px;background:rgba(255,255,255,0.1);border-radius:2px;width:65%"></div>
+        </div>
+        <div class="modern-main">
+          <div class="pv-line pv-w80"></div>
+          <div class="pv-line pv-w60"></div>
+          <div style="height:5px"></div>
+          <div style="height:2px;background:var(--accent);width:20px;border-radius:1px"></div>
+          <div class="pv-line pv-w80"></div>
+          <div class="pv-line pv-w60"></div>
+        </div>
+        <div class="template-badge">Modern</div>
+      </div>
+      <div class="cv-card-info">
+        <div class="cv-card-name">Product Designer CV</div>
+        <div class="cv-card-meta">
+          <div class="cv-card-date">Jun 8, 2025</div>
+          <div class="cv-card-template">Modern</div>
+        </div>
+      </div>
+      <div class="cv-card-actions">
+        <button class="action-btn" onclick="editCV(2)">Edit</button>
+        <button class="action-btn" onclick="downloadCV(2)">Download</button>
+        <button class="action-btn danger" onclick="confirmDelete(2)">Delete</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RECENT ACTIVITY -->
+  <div class="section-header reveal">
+    <div class="section-title">Recent activity</div>
+  </div>
+
+  <div class="activity-list reveal">
+    <div class="activity-item">
+      <div class="activity-dot dot-download"></div>
+      <div class="activity-text"><strong>Software Engineer CV</strong> downloaded as PDF</div>
+      <div class="activity-time">2 days ago</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot dot-edit"></div>
+      <div class="activity-text"><strong>Product Designer CV</strong> was edited</div>
+      <div class="activity-time">4 days ago</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot dot-create"></div>
+      <div class="activity-text"><strong>Product Designer CV</strong> was created</div>
+      <div class="activity-time">4 days ago</div>
+    </div>
+    <div class="activity-item">
+      <div class="activity-dot dot-create"></div>
+      <div class="activity-text"><strong>Software Engineer CV</strong> was created</div>
+      <div class="activity-time">6 days ago</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Delete CV?</div>
+    <p class="modal-sub">This action cannot be undone. Your CV will be permanently deleted.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" onclick="deleteCV()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── THEME ──
+const html = document.documentElement;
+document.getElementById('theme-btn').addEventListener('click', () => {
+  const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', t);
+  document.getElementById('theme-icon').textContent = t === 'dark' ? '☀' : '☾';
+  localStorage.setItem('sf-theme', t);
+});
+const saved = localStorage.getItem('sf-the  me');
+if (saved) {
+  html.setAttribute('data-theme', saved);
+  document.getElementById('theme-icon').textContent = saved === 'dark' ? '☀' : '☾';
+}
+
+// ── DROPDOWN ──
+function toggleDropdown() {
+  document.getElementById('dropdown').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('avatar-btn').contains(e.target)) {
+    document.getElementById('dropdown').classList.remove('open');
+  }
+});
+
+// ── CV ACTIONS ──
+let deleteTarget = null;
+
+function editCV(id) {
+  showToast('Opening CV editor...');
+  setTimeout(() => { window.location.href = 'index.html#builder'; }, 800);
+}
+
+function downloadCV(id) {
+  showToast('Preparing your PDF...');
+}
+
+function confirmDelete(id) {
+  deleteTarget = id;
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+function deleteCV() {
+  if (!deleteTarget) return;
+  const card = document.getElementById('cv-' + deleteTarget);
+  if (card) {
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.95)';
+    card.style.transition = 'opacity 0.2s, transform 0.2s';
+    setTimeout(() => {
+      card.remove();
+      const statEl = document.getElementById('stat-cvs');
+      statEl.textContent = parseInt(statEl.textContent) - 1;
+    }, 200);
+  }
+  closeModal();
+  showToast('CV deleted');
+  deleteTarget = null;
+}
+
+function closeModal() {
+  document.getElementById('delete-modal').classList.remove('open');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── ESCAPE KEY ──
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
