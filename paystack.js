@@ -32,16 +32,16 @@ async function initializePayment(onSuccess) {
         }
       ]
     },
-    callback: async function(response) {
+    callback: (response) => {
       // Payment successful
       if (response.status === 'success') {
-        // Upgrade user to pro in Supabase
-        await upgradeToPro();
-        showToast('Payment successful — Pro unlocked!');
-        if (onSuccess) onSuccess();
+        upgradeToPro().then(() => {
+          showToast('Payment successful — Pro unlocked!');
+          if (onSuccess) onSuccess();
+        });
       }
     },
-    onClose: function() {
+    onClose: () => {
       showToast('Payment cancelled');
     }
   });

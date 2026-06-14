@@ -65,9 +65,23 @@ async function getProfile() {
     .from('profiles')
     .select('*')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (error) return null;
+  if (error || !data) {
+    // Profile may not exist yet, create it
+    const { data: newProfile } = await db
+      .from('profiles')
+      .insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || '',
+        plan: 'free',
+        downloads: 0
+      })
+      .select()
+      .maybeSingle();
+    return newProfile;
+  }
   return data;
 }
 
