@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ForgeCV — Pricing</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="supabase.js"></script>
+<script src="paystack.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -686,17 +690,15 @@ function closeModal() {
   document.getElementById('pay-modal').classList.remove('open');
 }
 
-function simulatePayment() {
-  const btn = document.querySelector('#pay-modal .btn-primary');
-  btn.classList.add('loading');
-  setTimeout(() => {
-    btn.classList.remove('loading');
-    closeModal();
-    showToast('Payment successful — Pro unlocked');
-    document.getElementById('pay-btn').textContent = 'Pro unlocked ✓';
-    document.getElementById('pay-btn').style.background = '#34d399';
-    document.getElementById('pay-btn').style.pointerEvents = 'none';
-  }, 2000);
+async function simulatePayment() {
+  closeModal();
+  await initializePayment(() => {
+    showToast('Pro unlocked — all templates available');
+    const btn = document.getElementById('pay-btn');
+    btn.textContent = 'Pro unlocked ✓';
+    btn.style.background = '#34d399';
+    btn.style.pointerEvents = 'none';
+  });
 }
 
 // ── TOAST ──
