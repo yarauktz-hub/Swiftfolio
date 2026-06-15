@@ -786,7 +786,7 @@ let deleteTarget = null;
 
 function editCV(id) {
   showToast('Opening CV editor...');
-  setTimeout(() => { window.location.href = 'index.html#builder'; }, 800);
+  setTimeout(() => { window.location.href = 'index.html?cv=' + id + '#builder'; }, 800);
 }
 
 function downloadCV(id) {

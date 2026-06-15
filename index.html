@@ -602,19 +602,40 @@ h1 .highlight {
 .preview-meta-label { font-size: 0.75rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
 
 .preview-box {
-  background: #fff;
+  background: #888;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-  min-height: 460px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.preview-page {
+  background: #fff;
+  width: 100%;
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  transform-origin: top left;
+  position: relative;
 }
 
 /* ── CV PREVIEW INTERNALS ── */
-#cv-preview { font-family: Georgia, serif; font-size: 10px; line-height: 1.5; color: #1a1a2e; min-height: 460px; }
+#cv-preview {
+  font-family: 'Inter', sans-serif;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #1a1a2e;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
 
 /* Classic */
-.cv-classic { padding: 28px 24px; }
-.cv-classic .cv-header { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1.5px solid var(--accent); }
+.cv-classic { padding: 20px 18px; height: 100%; }
+.cv-classic .cv-header { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1.5px solid var(--accent); }
 .cv-classic .cv-photo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 .cv-classic .cv-photo-placeholder { width: 52px; height: 52px; border-radius: 50%; background: #f0eeff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--accent); }
 .cv-classic .cv-name { font-size: 18px; font-weight: bold; color: #1a1a2e; letter-spacing: -0.3px; }
@@ -632,7 +653,7 @@ h1 .highlight {
 .cv-classic .cv-skill { background: #f0eeff; color: var(--accent); padding: 2px 7px; border-radius: 20px; font-size: 7.5px; font-weight: 600; }
 
 /* Modern */
-.cv-modern { display: flex; min-height: 460px; }
+.cv-modern { display: flex; height: 100%; min-height: 100%; }
 .cv-modern .cv-sidebar { width: 36%; background: #1a1a2e; padding: 20px 14px; color: #fff; }
 .cv-modern .cv-photo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; }
 .cv-modern .cv-photo-placeholder { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.1); margin-bottom: 10px; }
@@ -653,7 +674,7 @@ h1 .highlight {
 .cv-modern .cv-entry { margin-bottom: 8px; }
 
 /* Minimal */
-.cv-minimal { padding: 28px 24px; background: #fafafa; }
+.cv-minimal { padding: 20px 18px; background: #fafafa; height: 100%; }
 .cv-minimal .cv-header { text-align: center; margin-bottom: 18px; padding-bottom: 14px; }
 .cv-minimal .cv-photo { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; }
 .cv-minimal .cv-photo-placeholder { width: 52px; height: 52px; border-radius: 50%; background: #eee; margin: 0 auto 8px; }
@@ -672,7 +693,7 @@ h1 .highlight {
 .cv-minimal .cv-skill { border: 1px solid #ddd; color: #555; padding: 2px 7px; font-size: 7.5px; border-radius: 3px; }
 
 /* Executive */
-.cv-executive { padding: 28px 24px; background: #0f1623; color: #fff; }
+.cv-executive { padding: 20px 18px; background: #0f1623; color: #fff; height: 100%; }
 .cv-executive .cv-name { font-size: 18px; font-weight: bold; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
 .cv-executive .cv-role { font-size: 9px; color: #c9a84c; margin: 3px 0 6px; letter-spacing: 1.5px; text-transform: uppercase; }
 .cv-executive .cv-divider-gold { width: 40px; height: 1.5px; background: #c9a84c; margin-bottom: 10px; }
@@ -687,7 +708,7 @@ h1 .highlight {
 .cv-executive .cv-skills { display: flex; flex-wrap: wrap; gap: 4px; }
 
 /* Bold */
-.cv-bold { padding: 0; background: #fff; overflow: hidden; }
+.cv-bold { padding: 0; background: #fff; overflow: hidden; height: 100%; }
 .cv-bold .cv-bold-header { background: var(--accent); padding: 20px 20px 16px; }
 .cv-bold .cv-name { font-size: 18px; font-weight: bold; color: #fff; }
 .cv-bold .cv-role { font-size: 9px; color: rgba(255,255,255,0.75); margin: 3px 0; }
@@ -1149,7 +1170,9 @@ footer {
         <span style="font-size:0.72rem;color:var(--text3)">Updates as you type</span>
       </div>
       <div class="preview-box">
-        <div id="cv-preview"></div>
+        <div class="preview-page">
+          <div id="cv-preview"></div>
+        </div>
       </div>
 
       <!-- DOWNLOAD -->
@@ -1348,8 +1371,35 @@ function updateProgress(d) {
 }
 
 // ── AUTO SAVE ──
+let currentCVId = null;
+let saveTimer = null;
+
 function autoSave(d) {
+  // Always save to localStorage first
   try { localStorage.setItem('sf-draft', JSON.stringify(d)); } catch(e) {}
+
+  // Debounce Supabase save — wait 2 seconds after user stops typing
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => saveToSupabase(d), 2000);
+}
+
+async function saveToSupabase(d) {
+  const user = await getUser();
+  if (!user) return; // Not logged in, skip cloud save
+
+  const title = [d.fname, d.lname].filter(Boolean).join(' ') + ' CV' || 'Untitled CV';
+  const cvData = d;
+
+  if (currentCVId) {
+    // Update existing CV
+    await updateCV(currentCVId, title, selectedTemplate, cvData);
+  } else {
+    // Create new CV
+    const result = await saveCV(title, selectedTemplate, cvData);
+    if (result.data) {
+      currentCVId = result.data.id;
+    }
+  }
 }
 
 function loadDraft() {
@@ -1371,6 +1421,44 @@ function loadDraft() {
     updateAll();
     showToast('Draft restored');
   } catch(e) {}
+}
+
+// Load existing CV if editing from dashboard
+async function loadCVFromDashboard() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const cvId = urlParams.get('cv');
+  if (!cvId) return;
+
+  const user = await getUser();
+  if (!user) return;
+
+  const { data, error } = await db
+    .from('cvs')
+    .select('*')
+    .eq('id', cvId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (!data) return;
+
+  currentCVId = data.id;
+  const d = data.cv_data;
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+  set('fname', d.fname); set('lname', d.lname); set('jobtitle', d.jobtitle);
+  set('email', d.email); set('phone', d.phone); set('location', d.location);
+  set('website', d.website); set('summary', d.summary);
+  set('skills', d.skills); set('languages', d.languages);
+
+  if (data.template) {
+    selectedTemplate = data.template;
+    document.querySelectorAll('.template-card').forEach(c => {
+      c.classList.remove('active');
+      if (c.getAttribute('onclick').includes(data.template)) c.classList.add('active');
+    });
+  }
+
+  updateAll();
+  showToast('CV loaded');
 }
 
 // ── HELPERS ──
@@ -1680,6 +1768,7 @@ addEntry('exp');
 addEntry('edu');
 updateAll();
 loadDraft();
+loadCVFromDashboard();
 </script>
 </body>
 </html>
